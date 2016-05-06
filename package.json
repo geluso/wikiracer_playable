@@ -1,0 +1,21 @@
+{
+  "name": "wikiracer",
+  "version": "1.0.0",
+  "description": "players log on to race each other from one randomly-picked wikipedia article to another",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "geluso",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "connect-flash": "^0.1.1",
+    "ejs": "^2.4.1",
+    "ejs-layouts": "0.0.1",
+    "express": "^4.13.4",
+    "express-ejs-layouts": "^2.1.0",
+    "express-session": "^1.13.0",
+    "socket.io": "^1.4.6"
+  }
+}
