@@ -56,6 +56,7 @@ function renderPage(data) {
   var page = document.getElementById('page');
   page.innerHTML = data.body;
 
+	attachScrollers();
   rerouteLinks();
 }
 
@@ -63,7 +64,7 @@ function rerouteLinks() {
   var links = document.getElementsByTagName('a');
 
   for (var i = 0; i < links.length; i++) {
-    links[i].onclick = linkClicker;
+    $(links[i]).on('click', linkClicker);
   }
 }
 
@@ -108,4 +109,23 @@ function displayMove(page) {
 	li.textContent = page;
 
 	lane.appendChild(li);
+}
+
+function attachScrollers() {
+  var links = $(".toctext");
+	links.each(function(i, link) {
+		$(link).on('click', function() {
+			var id = link.textContent.replace(/ /g, '_');
+			console.log('toc scroll', id);
+			scrollTo(id);
+		});
+	});
+
+}
+
+function scrollTo(id) {
+	id = "#" + id;
+	$('html, body').animate({
+  	scrollTop: $(id).offset().top
+  }, 2000);
 }
