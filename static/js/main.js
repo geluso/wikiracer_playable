@@ -7,7 +7,8 @@ socket.on('connect', function() {
 });
 
 $(function() {
-  socket.on('race-start', startRace);
+  socket.on('race-start', raceStart);
+  socket.on('race-tick', raceTick);
   socket.on('race-finish', renderData);
   socket.on('racer-new', racerNew);
   socket.on('racer-move', renderData);
@@ -42,27 +43,24 @@ function renderData(data) {
   }
 }
 
-var SECONDS = 0;
-function startRace(data) {
+function raceStart(data) {
 	$("#time").text('0:00');
 	$("#start").text(data.start);
 	$("#finish").text(data.finish);
 
-  setInterval(function() {
-    SECONDS++;
-
-    var minutes = Math.floor(SECONDS / 60);
-    var seconds = SECONDS % 60;
-    if (seconds < 10) {
-      seconds = '0' + seconds;
-    }
-
-    var timestamp = minutes + ':' + seconds;
-	  $("#time").text(timestamp);
-  }, 1000);
-
   loadingPage(data.start);
 	displayMove(data.start);
+}
+
+function raceTick(data) {
+  var minutes = Math.floor(data.seconds / 60);
+  var seconds = data.seconds % 60;
+  if (seconds < 10) {
+    seconds = '0' + seconds;
+  }
+
+  var timestamp = minutes + ':' + seconds;
+  $("#time").text(timestamp);
 }
 
 function renderPage(data) {

@@ -67,7 +67,7 @@ io.on('connect', function(socket) {
     racers++;
     console.log('racers:', racers);
     if (racers >= minRacers) {
-      startRace();
+      raceStart();
       racerMove(currentRace.start);
     } else {
       waiting();
@@ -106,13 +106,30 @@ function waiting() {
   });
 }
 
-function startRace() {
+var SECONDS = 0;
+var CLOCK = undefined;
+var MAX_DURATION = 120 * 1000;
+function raceStart() {
   isRacing = true;
   io.emit('race-start', currentRace);
+
+  SECONDS = 0;
+  CLOCK = setInterval(function() {
+    SECONDS++;
+    io.emit('race-tick', {seconds: SECONDS});
+  }, 1000);
+
+  // stop the clock after max race length
+  setTimeout(function() {
+    clearInterval(CLOCK);
+  }, MAX_DURATION);
 }
 
 function finishRace(winnerId) {
   isRacing = false;
+
+  clearInterval(CLOCK);
+
   io.emit('race-finish', {
     winner: winnerId
   });
