@@ -92,6 +92,7 @@ io.on('connect', function(socket) {
     var name = idsToNames[socket.id];
     names.push(name);
     delete idsToNames[socket.id];
+    delete idsToMoves[socket.id];
 
     io.emit('racer-crash', {
       id: socket.id,
