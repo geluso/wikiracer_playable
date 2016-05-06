@@ -13,6 +13,11 @@
   color: green;
 }
 
+.lane.crash .racer-info {
+  color: orange;
+  text-decoration: line-through;
+}
+
 .lane ol {
 	list-style-position: inside;
 	margin: 0;

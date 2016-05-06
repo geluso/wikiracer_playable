@@ -56,6 +56,7 @@ io.on('connect', function(socket) {
     name = names.pop();
   }
   idsToNames[socket.id] = name;
+  console.log('racers', idsToNames);
 
   io.emit('racer-new', {
     id: socket.id,
@@ -82,17 +83,20 @@ io.on('connect', function(socket) {
       racerMove(move.next);
     }
   });
-});
 
-io.on('disconnect', function(socket) {
-  racers--;
+  socket.on('disconnect', function() {
+    racers--;
+    console.log('disconnect', socket.id, "racers:", racers);
+    console.log('racers', idsToNames);
 
-  var name = idsToNames[socket.id];
-  names.push(name);
+    var name = idsToNames[socket.id];
+    names.push(name);
+    delete idsToNames[socket.id];
 
-  io.emit('crash', {
-    id: socket.id,
-    name: idsToNames
+    io.emit('racer-crash', {
+      id: socket.id,
+      name: idsToNames
+    });
   });
 });
 

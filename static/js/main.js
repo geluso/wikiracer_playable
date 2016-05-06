@@ -42,9 +42,24 @@ function renderData(data) {
   }
 }
 
+var SECONDS = 0;
 function startRace(data) {
+	$("#time").text('0:00');
 	$("#start").text(data.start);
 	$("#finish").text(data.finish);
+
+  setInterval(function() {
+    SECONDS++;
+
+    var minutes = Math.floor(SECONDS / 60);
+    var seconds = SECONDS % 60;
+    if (seconds < 10) {
+      seconds = '0' + seconds;
+    }
+
+    var timestamp = minutes + ':' + seconds;
+	  $("#time").text(timestamp);
+  }, 1000);
 
   loadingPage(data.start);
 	displayMove(data.start);
@@ -150,9 +165,8 @@ function racerNew(data) {
   if (lane && data.id === socketId) {
     resizePage();
     lane.className += " self";
+    socket.emit('racer-ready', {id: socket.id});
   }
-
-  socket.emit('racer-ready', {id: socket.id});
 }
 
 function racerCrash(data) {
@@ -162,7 +176,7 @@ function racerCrash(data) {
 
     setTimeout(function() {
       $(lane).remove();
-    }, 2000);
+    }, 5000);
   }
 
 }
@@ -181,16 +195,20 @@ function buildLane(data) {
   var info = document.createElement('div');
   info.className = 'racer-info';
   var time = document.createElement('span');
-  time.textContent = '0:00 ';
+  time.textContent = '';
   var name = document.createElement('span');
   name.textContent = data.name;
   var moves = document.createElement('ol');
+
+  var clear = document.createElement('div');
+  clear.className = 'clear';
 
   track.appendChild(lane);
     lane.appendChild(info);
       info.appendChild(time);
       info.appendChild(name);
     lane.appendChild(moves);
+    lane.appendChild(clear);
 
   return lane;
 }
