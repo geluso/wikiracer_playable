@@ -44,6 +44,9 @@ function renderData(data) {
 function startRace(data) {
 	$("#start").text(data.start);
 	$("#finish").text(data.finish);
+
+  loadingPage(data.start);
+	displayMove(data.start);
 }
 
 function renderPage(data) {
@@ -67,6 +70,9 @@ function rerouteLinks() {
 function linkClicker(e) {
   e.preventDefault();
 
+	if (e.target.tagName !== 'A') {
+		displayMove('non-wiki');
+	}
 
   console.log('clicked', e.target);
   var path = e.target.pathname;
@@ -76,9 +82,14 @@ function linkClicker(e) {
     return
   }
 
+	if (!path.startsWith('/wiki')) {
+		displayMove('non-wiki');
+	}
+
   console.log('clicked', path);
 
   loadingPage(path);
+	displayMove(path);
 
   socket.emit('client-racer-move', {
     current: 'whatever',
@@ -89,4 +100,12 @@ function linkClicker(e) {
 function loadingPage(path) {
   var page = document.getElementById('page');
   page.textContent = "loading " + path;
+}
+
+function displayMove(page) {
+	var lane = document.querySelector('#racetrack .lane ol');
+	var li = document.createElement('li');
+	li.textContent = page;
+
+	lane.appendChild(li);
 }
