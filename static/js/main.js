@@ -50,6 +50,44 @@ function renderData(data) {
 function renderPage(data) {
   console.log("got page", data.page, data.body.length);
   renderData({page: data.page, length: data.body.length});
+
   var page = document.getElementById('page');
   page.innerHTML = data.body;
+
+  rerouteLinks();
+}
+
+function rerouteLinks() {
+  var links = document.getElementsByTagName('a');
+
+  for (var i = 0; i < links.length; i++) {
+    links[i].onclick = linkClicker;
+  }
+}
+
+function linkClicker(e) {
+  e.preventDefault();
+
+
+  console.log('clicked', e.target);
+  var path = e.target.pathname;
+
+  // ignore links without paths
+  if (!path) {
+    return
+  }
+
+  console.log('clicked', path);
+
+  loadingPage(path);
+
+  socket.emit('client-racer-move', {
+    current: 'whatever',
+    next: path
+  });
+}
+
+function loadingPage(path) {
+  var page = document.getElementById('page');
+  page.textContent = "loading " + path;
 }

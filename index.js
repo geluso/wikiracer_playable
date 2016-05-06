@@ -32,7 +32,7 @@ var currentRace = {
 var isRacing = false;
 
 var racers = 0;
-var minRacers = 2;
+var minRacers = 1;
 
 io.on('connect', function(socket) {
   console.log('connected:', socket.id);
@@ -41,20 +41,7 @@ io.on('connect', function(socket) {
   console.log('racers:', racers);
   if (racers >= minRacers) {
     startRace();
-
-    var url = WIKI_URL + currentRace.start;
-    request(url, function(err, response, body) {
-      if (!err && response.statusCode === 200) {
-        console.log("got page ok:", url, body.length);
-
-        io.emit('receive-page', {
-          page: currentRace.start,
-          body: body
-        });
-      } else {
-        console.log("error fetching:", url);
-      }
-    });
+    racerMove(currentRace.start);
   } else {
     waiting();
   }
@@ -65,6 +52,7 @@ io.on('connect', function(socket) {
       finishRace(socket.id);
     } else {
       io.emit('racer-move', move);
+      racerMove(move.next);
     }
   });
 });
@@ -95,6 +83,23 @@ function finishRace(winnerId) {
   });
 }
 
+function racerMove(href) {
+  var url = WIKI_URL + href;
+  console.log('getting:', url);
+
+  request(url, function(err, response, body) {
+    if (!err && response.statusCode === 200) {
+      console.log("got page ok:", url, body.length);
+
+      io.emit('receive-page', {
+        page: href,
+        body: body
+      });
+    } else {
+      console.log("error fetching:", url);
+    }
+  });
+}
 
 app.get('/', function(req, res) {
   res.render('index');
