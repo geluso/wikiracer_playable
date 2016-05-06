@@ -7,21 +7,6 @@ socket.on('connect', function() {
 });
 
 $(function() {
-  // send chats
-  $('#move').on('click', function(e) {
-    socket.emit('client-racer-move', {
-      'current': '/wiki/Scotland',
-      'next': Math.random()
-    });
-  });
-
-  $('#finish').on('click', function(e) {
-    socket.emit('client-racer-move', {
-      'current': '/wiki/Scotland',
-      'next': '/wiki/NASCAR'
-    });
-  });
-
   socket.on('race-start', renderData);
   socket.on('race-start', renderData);
   socket.on('race-finish', renderData);
