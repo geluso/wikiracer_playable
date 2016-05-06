@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var ejsLayouts = require('express-ejs-layouts');
 var session = require('express-session');
 var flash = require('connect-flash');
+var request = require('request');
 
 var app = express()
 var http = require('http').Server(app)
@@ -21,6 +22,8 @@ app.use(session({
   saveUninitialized: true
 }));
 
+var WIKI_URL = "http://en.wikipedia.org";
+
 var currentRace = {
   start: '/wiki/Scotland',
   finish: '/wiki/NASCAR'
@@ -38,6 +41,20 @@ io.on('connect', function(socket) {
   console.log('racers:', racers);
   if (racers >= minRacers) {
     startRace();
+
+    var url = WIKI_URL + currentRace.start;
+    request(url, function(err, response, body) {
+      if (!err && response.statusCode === 200) {
+        console.log("got page ok:", url, body.length);
+
+        io.emit('receive-page', {
+          page: currentRace.start,
+          body: body
+        });
+      } else {
+        console.log("error fetching:", url);
+      }
+    });
   } else {
     waiting();
   }

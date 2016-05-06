@@ -25,13 +25,16 @@ $(function() {
   socket.on('race-finish', renderData);
   socket.on('racer-move', renderData);
   socket.on('racer-crash', renderData);
+
+  socket.on('receive-page', renderPage);
 });
 
 function renderData(data) {
   console.log(data)
 
+  var msg = document.getElementById('msg');
   var p = document.createElement('p');
-  document.body.appendChild(p);
+  msg.appendChild(p);
 
   for (key in data) {
     var strong = document.createElement('strong');
@@ -44,3 +47,9 @@ function renderData(data) {
   }
 }
 
+function renderPage(data) {
+  console.log("got page", data.page, data.body.length);
+  renderData({page: data.page, length: data.body.length});
+  var page = document.getElementById('page');
+  page.innerHTML = data.body;
+}
