@@ -35,6 +35,7 @@ var names = [
 ];
 
 var idsToNames = {};
+var idsToMoves = {};
 
 var WIKI_URL = "http://en.wikipedia.org";
 
@@ -63,24 +64,23 @@ io.on('connect', function(socket) {
     name: name
   });
 
+  infoRacers();
+
   socket.on('racer-ready', function(data) {
     racers++;
     console.log('racers:', racers);
     if (racers >= minRacers) {
-      raceStart();
-      racerMove(currentRace.start);
-    } else {
-      waiting();
+      console.log("race starting in 3.. 2.. 1.. GO!!");
+      setTimeout(raceStart, 3000);
     }
   });
 
-  socket.on('client-racer-move', function(move) {
-    console.log(socket.id, "moves to", move);
-    if (move.next === currentRace.finish) {
+  socket.on('client-racer-move', function(data) {
+    console.log(socket.id, "moves to", data);
+    if (data.page === currentRace.finish) {
       finishRace(socket.id);
     } else {
-      io.emit('racer-move', move);
-      racerMove(move.next);
+      racerMove(data.id, data.page);
     }
   });
 
@@ -100,10 +100,14 @@ io.on('connect', function(socket) {
   });
 });
 
-function waiting() {
-  io.emit('waiting', {
-    racers: racers
-  });
+function infoRacers() {
+  var data = {
+    moves: idsToMoves,
+    names: idsToNames
+  };
+
+  console.log('inforacers', data);
+  io.emit('info-racers', data);
 }
 
 var START = 0;
@@ -119,6 +123,11 @@ function raceStart() {
     seconds = Math.floor(seconds / 1000);
     io.emit('race-tick', {seconds: seconds});
   }, 1000);
+
+  // send the first page to all current racers
+  for (var id in idsToNames) {
+    racerMove(id, currentRace.start);
+  }
 
   // stop the clock after max race length
   setTimeout(function() {
@@ -136,7 +145,7 @@ function finishRace(winnerId) {
   });
 }
 
-function racerMove(href) {
+function racerMove(id, href) {
   var url = WIKI_URL + href;
   console.log('getting:', url);
 
@@ -144,13 +153,30 @@ function racerMove(href) {
     if (!err && response.statusCode === 200) {
       console.log("got page ok:", url, body.length);
 
-      io.emit('receive-page', {
+      console.log('sending page to:', id);
+      io.to(id).emit('receive-page', {
         page: href,
         body: body
       });
     } else {
       console.log("error fetching:", url);
     }
+  });
+
+  // default to an empty list
+  if (!idsToMoves[id]) {
+    idsToMoves[id] = [];
+    console.log('racer moves 1st')
+  }
+
+  var moves = idsToMoves[id];
+  moves.push(href);
+
+  console.log('racer moves', id, moves)
+
+  io.emit('racer-move', {
+    id: id,
+    page: href
   });
 }
 

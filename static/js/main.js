@@ -7,11 +7,14 @@ socket.on('connect', function() {
 });
 
 $(function() {
+  socket.on('info-racers', infoRacers);
+
   socket.on('race-start', raceStart);
   socket.on('race-tick', raceTick);
   socket.on('race-finish', renderData);
+
   socket.on('racer-new', racerNew);
-  socket.on('racer-move', renderData);
+  socket.on('racer-move', racerMove);
   socket.on('racer-crash', racerCrash);
 
   socket.on('receive-page', renderPage);
@@ -43,6 +46,24 @@ function renderData(data) {
   }
 }
 
+function infoRacers(data) {
+  console.log('inforacers', data);
+  for (var id in data.names) {
+    var name = data.names[id];
+    var moves = data.moves[id];
+
+    racerNew({id: id, name: name});
+    if (moves) {
+      console.log('got moves', id, moves);
+      for (var move in moves) {
+        displayRacerMove(id, move);
+      }
+    } else {
+      console.log('no moves', id, moves);
+    }
+  }
+}
+
 function raceStart(data) {
 	$("#time").text('0:00');
 
@@ -53,7 +74,6 @@ function raceStart(data) {
 	$("#finish").text(finishText);
 
   loadingPage(data.start);
-	displayMove(data.start);
 }
 
 function raceTick(data) {
@@ -82,7 +102,7 @@ function rerouteLinks() {
   var links = document.getElementsByTagName('a');
 
   for (var i = 0; i < links.length; i++) {
-    $(links[i]).on('click', linkClicker);
+    $(links[i]).on('mouseup', linkClicker);
   }
 }
 
@@ -90,7 +110,7 @@ function linkClicker(e) {
   e.preventDefault();
 
 	if (e.target.tagName !== 'A') {
-		displayMove('non-wiki');
+		// displayMove('non-wiki');
 	}
 
   console.log('clicked', e.target);
@@ -102,35 +122,22 @@ function linkClicker(e) {
   }
 
 	if (!path.startsWith('/wiki')) {
-		displayMove('non-wiki');
+		// displayMove('non-wiki');
 	}
 
   console.log('clicked', path);
 
   loadingPage(path);
-	displayMove(path);
 
   socket.emit('client-racer-move', {
-    current: 'whatever',
-    next: path
+    id: '/#' + socket.id,
+    page: path
   });
 }
 
 function loadingPage(path) {
   var page = document.getElementById('page');
   page.textContent = "loading " + path;
-}
-
-function displayMove(page) {
-	var lane = document.querySelector('#racetrack .lane ol');
-	var li = document.createElement('li');
-
-  var text = page.replace('/wiki/', '');
-	li.textContent = text;
-
-	lane.appendChild(li);
-
-  resizePage();
 }
 
 function resizePage() {
@@ -173,6 +180,31 @@ function racerNew(data) {
   }
 }
 
+function racerMove(data) {
+  displayRacerMove(data.id, data.page);
+}
+
+function displayRacerMove(id, page) {
+  console.log('moving', id, page);
+	var lane = document.getElementById(id)
+
+  if (!lane) {
+    console.log("couldn't find lane:", id);
+    return
+  }
+
+  lane = lane.querySelector('ol');
+
+	var li = document.createElement('li');
+
+  var text = page.replace('/wiki/', '');
+	li.textContent = text;
+
+	lane.appendChild(li);
+
+  resizePage();
+}
+
 function racerCrash(data) {
   var lane = document.getElementById(data.id);
   if (lane) {
@@ -189,7 +221,7 @@ function buildLane(data) {
   var track = document.getElementById('racetrack');
 
   if (document.getElementById(data.id)) {
-    return flase;
+    return false;
   }
 
   var lane = document.createElement('div');
@@ -216,3 +248,4 @@ function buildLane(data) {
 
   return lane;
 }
+
