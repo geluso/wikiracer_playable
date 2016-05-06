@@ -45,8 +45,12 @@ function renderData(data) {
 
 function raceStart(data) {
 	$("#time").text('0:00');
-	$("#start").text(data.start);
-	$("#finish").text(data.finish);
+
+  var startText = data.start.replace('/wiki/', '');
+  var finishText = data.finish.replace('/wiki/', '');
+
+	$("#start").text(startText);
+	$("#finish").text(finishText);
 
   loadingPage(data.start);
 	displayMove(data.start);
@@ -120,7 +124,9 @@ function loadingPage(path) {
 function displayMove(page) {
 	var lane = document.querySelector('#racetrack .lane ol');
 	var li = document.createElement('li');
-	li.textContent = page;
+
+  var text = page.replace('/wiki/', '');
+	li.textContent = text;
 
 	lane.appendChild(li);
 

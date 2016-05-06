@@ -1,8 +1,16 @@
 #racetrack {
 	border-bottom: solid black 1px;
 	padding-bottom: 1em;
-	position: fixed;
 	background-color: white;
+
+	position: fixed;
+  left: 0;
+  right: 0;
+
+  z-index: 10;
+
+  padding-left: 1em;
+  padding-right: 1em;
 }
 
 .racer-info {
