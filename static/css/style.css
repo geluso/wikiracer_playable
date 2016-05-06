@@ -1,3 +1,10 @@
+#racetrack {
+	border-bottom: solid black 1px;
+	padding-bottom: 1em;
+	position: fixed;
+	background-color: white;
+}
+
 .racer-info {
 	font-weight: bold;
 }

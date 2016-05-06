@@ -109,6 +109,9 @@ function displayMove(page) {
 	li.textContent = page;
 
 	lane.appendChild(li);
+
+	var height = $("#racetrack").outerHeight() + 10;
+	$("#page").css({marginTop: height + 'px'});
 }
 
 function attachScrollers() {
@@ -125,7 +128,10 @@ function attachScrollers() {
 
 function scrollTo(id) {
 	id = "#" + id;
+
+	var height = $("#racetrack").outerHeight() + 10;
+
 	$('html, body').animate({
-  	scrollTop: $(id).offset().top
+  	scrollTop: $(id).offset().top - height
   }, 2000);
 }
