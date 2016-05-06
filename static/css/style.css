@@ -9,6 +9,10 @@
 	font-weight: bold;
 }
 
+.lane.self .racer-info {
+  color: green;
+}
+
 .lane ol {
 	list-style-position: inside;
 	margin: 0;

@@ -9,8 +9,9 @@ socket.on('connect', function() {
 $(function() {
   socket.on('race-start', startRace);
   socket.on('race-finish', renderData);
+  socket.on('racer-new', racerNew);
   socket.on('racer-move', renderData);
-  socket.on('racer-crash', renderData);
+  socket.on('racer-crash', racerCrash);
 
   socket.on('receive-page', renderPage);
 });
@@ -110,6 +111,10 @@ function displayMove(page) {
 
 	lane.appendChild(li);
 
+  resizePage();
+}
+
+function resizePage() {
 	var height = $("#racetrack").outerHeight() + 10;
 	$("#page").css({marginTop: height + 'px'});
 }
@@ -134,4 +139,58 @@ function scrollTo(id) {
 	$('html, body').animate({
   	scrollTop: $(id).offset().top - height
   }, 2000);
+}
+
+function racerNew(data) {
+  renderData(data);
+
+  var lane = buildLane(data);
+
+  var socketId = "/#" + socket.id;
+  if (lane && data.id === socketId) {
+    resizePage();
+    lane.className += " self";
+  }
+
+  socket.emit('racer-ready', {id: socket.id});
+}
+
+function racerCrash(data) {
+  var lane = document.getElementById(data.id);
+  if (lane) {
+    lane.className += " crash"
+
+    setTimeout(function() {
+      $(lane).remove();
+    }, 2000);
+  }
+
+}
+
+function buildLane(data) {
+  var track = document.getElementById('racetrack');
+
+  if (document.getElementById(data.id)) {
+    return flase;
+  }
+
+  var lane = document.createElement('div');
+  lane.id = data.id;
+  lane.className = 'lane'
+
+  var info = document.createElement('div');
+  info.className = 'racer-info';
+  var time = document.createElement('span');
+  time.textContent = '0:00 ';
+  var name = document.createElement('span');
+  name.textContent = data.name;
+  var moves = document.createElement('ol');
+
+  track.appendChild(lane);
+    lane.appendChild(info);
+      info.appendChild(time);
+      info.appendChild(name);
+    lane.appendChild(moves);
+
+  return lane;
 }

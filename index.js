@@ -22,6 +22,20 @@ app.use(session({
   saveUninitialized: true
 }));
 
+var names = [
+  "Jeff Gordon",
+  "Dale Earnhardt Jr.",
+  "Speed Racer",
+  "Richard Petty",
+  "Mario Andretti",
+  "Dale Earnhardt",
+  "Michael Schumacher",
+  "Ayrton Senna",
+  "James Hunt"
+];
+
+var idsToNames = {};
+
 var WIKI_URL = "http://en.wikipedia.org";
 
 var currentRace = {
@@ -32,19 +46,32 @@ var currentRace = {
 var isRacing = false;
 
 var racers = 0;
-var minRacers = 1;
+var minRacers = 3;
 
 io.on('connect', function(socket) {
   console.log('connected:', socket.id);
 
-  racers++;
-  console.log('racers:', racers);
-  if (racers >= minRacers) {
-    startRace();
-    racerMove(currentRace.start);
-  } else {
-    waiting();
+  var name = "Mystery Racer";
+  if (names.length > 0) {
+    name = names.pop();
   }
+  idsToNames[socket.id] = name;
+
+  io.emit('racer-new', {
+    id: socket.id,
+    name: name
+  });
+
+  socket.on('racer-ready', function(data) {
+    racers++;
+    console.log('racers:', racers);
+    if (racers >= minRacers) {
+      startRace();
+      racerMove(currentRace.start);
+    } else {
+      waiting();
+    }
+  });
 
   socket.on('client-racer-move', function(move) {
     console.log(socket.id, "moves to", move);
@@ -60,8 +87,12 @@ io.on('connect', function(socket) {
 io.on('disconnect', function(socket) {
   racers--;
 
+  var name = idsToNames[socket.id];
+  names.push(name);
+
   io.emit('crash', {
-    racer: socket.id
+    id: socket.id,
+    name: idsToNames
   });
 });
 
