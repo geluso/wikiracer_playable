@@ -7,8 +7,7 @@ socket.on('connect', function() {
 });
 
 $(function() {
-  socket.on('race-start', renderData);
-  socket.on('race-start', renderData);
+  socket.on('race-start', startRace);
   socket.on('race-finish', renderData);
   socket.on('racer-move', renderData);
   socket.on('racer-crash', renderData);
@@ -40,6 +39,11 @@ function renderData(data) {
     strong.textContent = key + ": ";
     span.textContent = data[key] + " ";
   }
+}
+
+function startRace(data) {
+	$("#start").text(data.start);
+	$("#finish").text(data.finish);
 }
 
 function renderPage(data) {
