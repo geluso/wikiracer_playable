@@ -1,3 +1,5 @@
+var LOG_LEVEL = 1;
+
 var socket = io();
 
 socket.on('connect', function() {
@@ -30,7 +32,15 @@ $(function() {
 });
 
 function renderData(data) {
+	if (LOG_LEVEL < 1) {
+		return;
+	}
+
   console.log(data)
+
+	if (LOG_LEVEL < 2) {
+		return;
+	}
 
   var msg = document.getElementById('msg');
   var p = document.createElement('p');
