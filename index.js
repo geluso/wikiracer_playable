@@ -106,17 +106,18 @@ function waiting() {
   });
 }
 
-var SECONDS = 0;
+var START = 0;
 var CLOCK = undefined;
 var MAX_DURATION = 120 * 1000;
 function raceStart() {
   isRacing = true;
   io.emit('race-start', currentRace);
 
-  SECONDS = 0;
+  START = new Date().getTime();
   CLOCK = setInterval(function() {
-    SECONDS++;
-    io.emit('race-tick', {seconds: SECONDS});
+    seconds = new Date().getTime() - START;
+    seconds = Math.floor(seconds / 1000);
+    io.emit('race-tick', {seconds: seconds});
   }, 1000);
 
   // stop the clock after max race length
