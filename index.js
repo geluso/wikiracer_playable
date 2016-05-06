@@ -8,6 +8,7 @@ var request = require('request');
 var app = express()
 var http = require('http').Server(app)
 var io = require('socket.io')(http);
+io.emit('server-reset')
 
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/static'));
@@ -171,7 +172,11 @@ function racerMove(id, href) {
   }
 
   var moves = idsToMoves[id];
-  moves.push(href);
+
+  // prevent adding weird dupes
+  if (moves[moves.length - 1] !== href) {
+    moves.push(href);
+  }
 
   console.log('racer moves', id, moves)
 

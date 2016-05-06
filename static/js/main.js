@@ -7,6 +7,8 @@ socket.on('connect', function() {
 });
 
 $(function() {
+  socket.on('server-reset', serverReset);
+
   socket.on('info-racers', infoRacers);
 
   socket.on('race-start', raceStart);
@@ -19,6 +21,13 @@ $(function() {
 
   socket.on('receive-page', renderPage);
 });
+
+function serverReset() {
+  var track = document.getElementById('racetrack');
+  var page = document.getElementById('page');
+  track.innerHtml = '';
+  page.innerHtml = '';
+}
 
 function renderData(data) {
 	if (LOG_LEVEL < 1) {
@@ -55,8 +64,14 @@ function infoRacers(data) {
     racerNew({id: id, name: name});
     if (moves) {
       console.log('got moves', id, moves);
-      for (var move in moves) {
-        displayRacerMove(id, move);
+
+	    var lane = document.getElementById(id);
+      var lis = lane.querySelectorAll('li');
+
+      for (var i = 0; i < moves.length; i++) {
+        if (i > lis.length) {
+          displayRacerMove(id, moves[i]);
+        }
       }
     } else {
       console.log('no moves', id, moves);
