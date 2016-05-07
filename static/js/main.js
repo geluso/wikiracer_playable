@@ -13,7 +13,7 @@ $(function() {
 
   socket.on('race-start', raceStart);
   socket.on('race-tick', raceTick);
-  socket.on('race-finish', renderData);
+  socket.on('race-finish', raceFinish);
 
   socket.on('racer-new', racerNew);
   socket.on('racer-move', racerMove);
@@ -27,6 +27,10 @@ function serverReset() {
   var page = document.getElementById('page');
   track.innerHtml = '';
   page.innerHtml = '';
+}
+
+function requestInfo() {
+  socket.emit('info-racers-request');
 }
 
 function renderData(data) {
@@ -56,6 +60,9 @@ function renderData(data) {
 }
 
 function infoRacers(data) {
+
+  displayRaceStart(data.race);
+
   console.log('inforacers', data);
   for (var id in data.names) {
     var name = data.names[id];
@@ -80,10 +87,38 @@ function infoRacers(data) {
 }
 
 function raceStart(data) {
+  serverReset();
+  requestInfo();
+
+  displayRaceStart(data);
+}
+
+function raceFinish(data) {
+  if (data.winner) {
+
+    var winText = "";
+    if (data.id === socket.id) {
+      winText += "You won!";
+    } else {
+      winText += "You lost. " + data.winner + " won.";
+    }
+    alert(winText);
+
+    console.log("winner:", data.winner);
+    var lane = document.getElementById(data.winner);
+    lane.className += " winner";
+  } else {
+    console.log("no winner :(");
+  }
+}
+
+function displayRaceStart(data) {
 	$("#time").text('0:00');
 
   var startText = data.start.replace('/wiki/', '');
+  startText.replace(/_/g, ' ');
   var finishText = data.finish.replace('/wiki/', '');
+  finishText.replace(/_/g, ' ');
 
 	$("#start").text(startText);
 	$("#finish").text(finishText);

@@ -5,6 +5,9 @@ var session = require('express-session');
 var flash = require('connect-flash');
 var request = require('request');
 
+var topPages = require('./top-pages');
+console.log('top pages', topPages.length);
+
 var app = express()
 var http = require('http').Server(app)
 var io = require('socket.io')(http);
@@ -40,10 +43,23 @@ var idsToMoves = {};
 
 var WIKI_URL = "http://en.wikipedia.org";
 
-var currentRace = {
-  start: '/wiki/Scotland',
-  finish: '/wiki/NASCAR'
-};
+function generateRace() {
+  var r1, r2;
+  do {
+    r1 = Math.floor(Math.random() * topPages.length);
+    r2 = Math.floor(Math.random() * topPages.length);
+  } while (r1 == r2)
+
+  var start = topPages[r1];
+  var finish = topPages[r2];
+
+  return {
+    start: start,
+    finish: finish
+  }
+}
+
+var currentRace = generateRace();
 
 var isRacing = false;
 
@@ -70,11 +86,15 @@ io.on('connect', function(socket) {
   socket.on('racer-ready', function(data) {
     racers++;
     console.log('racers:', racers);
-    if (racers >= minRacers) {
+    if (racers >= minRacers && !isRacing) {
       console.log("race starting in 3.. 2.. 1.. GO!!");
       setTimeout(raceStart, 3000);
+    } else if (isRacing) {
+      infoRacers();
     }
   });
+
+  socket.on('info-racers-request', infoRacers);
 
   socket.on('client-racer-move', function(data) {
     console.log(socket.id, "moves to", data);
@@ -104,6 +124,7 @@ io.on('connect', function(socket) {
 
 function infoRacers() {
   var data = {
+    race: currentRace,
     moves: idsToMoves,
     names: idsToNames
   };
@@ -114,9 +135,15 @@ function infoRacers() {
 
 var START = 0;
 var CLOCK = undefined;
-var MAX_DURATION = 120 * 1000;
+var MAX_DURATION = 1000 * 1000;
 function raceStart() {
   isRacing = true;
+  currentRace = generateRace();
+
+  console.log('start:', currentRace.start);
+  console.log('finish:', currentRace.finish);
+
+  io.emit('server-reset', currentRace);
   io.emit('race-start', currentRace);
 
   START = new Date().getTime();
@@ -143,7 +170,8 @@ function finishRace(winnerId) {
   clearInterval(CLOCK);
 
   io.emit('race-finish', {
-    winner: winnerId
+    id: winnerId,
+    winner: idsToNames[winnerId]
   });
 }
 
