@@ -3,7 +3,7 @@ var LOG_LEVEL = 1;
 var socket = io();
 
 socket.on('connect', function() {
-  console.log('connected!', socket.id);
+  console.log('connected!', socket.id, socket);
 });
 
 $(function() {
@@ -214,7 +214,7 @@ function scrollTo(id) {
 
 	$('html, body').animate({
   	scrollTop: $(id).offset().top - height
-  }, 2000);
+  }, 000);
 }
 
 function racerNew(data) {

@@ -30,13 +30,14 @@
 	list-style-position: inside;
 	margin: 0;
 	padding: 0;
+  overflow: scroll;
 }
 
 .lane ol li {
-  float: left;
 	border: solid;
 	margin: 2px;
 	padding: 2px;
+  display: inline;
 }
 
 .clear {

@@ -64,10 +64,10 @@ var currentRace = generateRace();
 var isRacing = false;
 
 var racers = 0;
-var minRacers = 3;
+var minRacers = 2;
 
 io.on('connect', function(socket) {
-  console.log('connected:', socket.id);
+  console.log('connected:', socket.id, socket);
 
   var name = "Mystery Racer";
   if (names.length > 0) {
