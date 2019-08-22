@@ -16,7 +16,7 @@ io.emit('server-reset')
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/static'));
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(ejsLayouts);
 app.use(flash());
 
@@ -66,7 +66,7 @@ var isRacing = false;
 var racers = 0;
 var minRacers = 2;
 
-io.on('connect', function(socket) {
+io.on('connect', function (socket) {
   console.log('connected:', socket.id, socket);
 
   var name = "Mystery Racer";
@@ -83,7 +83,7 @@ io.on('connect', function(socket) {
 
   infoRacers();
 
-  socket.on('racer-ready', function(data) {
+  socket.on('racer-ready', function (data) {
     racers++;
     console.log('racers:', racers);
     if (racers >= minRacers && !isRacing) {
@@ -96,16 +96,19 @@ io.on('connect', function(socket) {
 
   socket.on('info-racers-request', infoRacers);
 
-  socket.on('client-racer-move', function(data) {
+  socket.on('client-racer-move', function (data) {
     console.log(socket.id, "moves to", data);
+    let isWinner = false
     if (data.page === currentRace.finish) {
+      isWinner = true
+      racerMove(data.id, data.page, isWinner);
       finishRace(socket.id);
     } else {
-      racerMove(data.id, data.page);
+      racerMove(data.id, data.page, isWinner);
     }
   });
 
-  socket.on('disconnect', function() {
+  socket.on('disconnect', function () {
     racers--;
     console.log('disconnect', socket.id, "racers:", racers);
     console.log('racers', idsToNames);
@@ -147,10 +150,10 @@ function raceStart() {
   io.emit('race-start', currentRace);
 
   START = new Date().getTime();
-  CLOCK = setInterval(function() {
+  CLOCK = setInterval(function () {
     seconds = new Date().getTime() - START;
     seconds = Math.floor(seconds / 1000);
-    io.emit('race-tick', {seconds: seconds});
+    io.emit('race-tick', { seconds: seconds });
   }, 1000);
 
   // send the first page to all current racers
@@ -159,7 +162,7 @@ function raceStart() {
   }
 
   // stop the clock after max race length
-  setTimeout(function() {
+  setTimeout(function () {
     clearInterval(CLOCK);
   }, MAX_DURATION);
 }
@@ -175,11 +178,11 @@ function finishRace(winnerId) {
   });
 }
 
-function racerMove(id, href) {
+function racerMove(id, href, isWinner = false) {
   var url = WIKI_URL + href;
   console.log('getting:', url);
 
-  request(url, function(err, response, body) {
+  request(url, function (err, response, body) {
     if (!err && response.statusCode === 200) {
       console.log("got page ok:", url, body.length);
 
@@ -214,7 +217,7 @@ function racerMove(id, href) {
   });
 }
 
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
   res.render('index');
 });
 

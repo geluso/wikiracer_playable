@@ -2,11 +2,11 @@ var LOG_LEVEL = 1;
 
 var socket = io();
 
-socket.on('connect', function() {
+socket.on('connect', function () {
   console.log('connected!', socket.id, socket);
 });
 
-$(function() {
+$(function () {
   socket.on('server-reset', serverReset);
 
   socket.on('info-racers', infoRacers);
@@ -34,15 +34,15 @@ function requestInfo() {
 }
 
 function renderData(data) {
-	if (LOG_LEVEL < 1) {
-		return;
-	}
+  if (LOG_LEVEL < 1) {
+    return;
+  }
 
   console.log(data)
 
-	if (LOG_LEVEL < 2) {
-		return;
-	}
+  if (LOG_LEVEL < 2) {
+    return;
+  }
 
   var msg = document.getElementById('msg');
   var p = document.createElement('p');
@@ -68,11 +68,11 @@ function infoRacers(data) {
     var name = data.names[id];
     var moves = data.moves[id];
 
-    racerNew({id: id, name: name});
+    racerNew({ id: id, name: name });
     if (moves) {
       console.log('got moves', id, moves);
 
-	    var lane = document.getElementById(id);
+      var lane = document.getElementById(id);
       var lis = lane.querySelectorAll('li');
 
       for (var i = 0; i < moves.length; i++) {
@@ -113,15 +113,15 @@ function raceFinish(data) {
 }
 
 function displayRaceStart(data) {
-	$("#time").text('0:00');
+  $("#time").text('0:00');
 
   var startText = data.start.replace('/wiki/', '');
   startText.replace(/_/g, ' ');
   var finishText = data.finish.replace('/wiki/', '');
   finishText.replace(/_/g, ' ');
 
-	$("#start").text(startText);
-	$("#finish").text(finishText);
+  $("#start").text(startText);
+  $("#finish").text(finishText);
 
   loadingPage(data.start);
 }
@@ -139,12 +139,12 @@ function raceTick(data) {
 
 function renderPage(data) {
   console.log("got page", data.page, data.body.length);
-  renderData({page: data.page, length: data.body.length});
+  renderData({ page: data.page, length: data.body.length });
 
   var page = document.getElementById('page');
   page.innerHTML = data.body;
 
-	attachScrollers();
+  attachScrollers();
   rerouteLinks();
 }
 
@@ -159,9 +159,9 @@ function rerouteLinks() {
 function linkClicker(e) {
   e.preventDefault();
 
-	if (e.target.tagName !== 'A') {
-		// displayMove('non-wiki');
-	}
+  if (e.target.tagName !== 'A') {
+    // displayMove('non-wiki');
+  }
 
   console.log('clicked', e.target);
   var path = e.target.pathname;
@@ -171,9 +171,9 @@ function linkClicker(e) {
     return
   }
 
-	if (!path.startsWith('/wiki')) {
-		// displayMove('non-wiki');
-	}
+  if (!path.startsWith('/wiki')) {
+    // displayMove('non-wiki');
+  }
 
   console.log('clicked', path);
 
@@ -191,29 +191,29 @@ function loadingPage(path) {
 }
 
 function resizePage() {
-	var height = $("#racetrack").outerHeight() + 10;
-	$("#page").css({marginTop: height + 'px'});
+  var height = $("#racetrack").outerHeight() + 10;
+  $("#page").css({ marginTop: height + 'px' });
 }
 
 function attachScrollers() {
   var links = $(".toctext");
-	links.each(function(i, link) {
-		$(link).on('click', function() {
-			var id = link.textContent.replace(/ /g, '_');
-			console.log('toc scroll', id);
-			scrollTo(id);
-		});
-	});
+  links.each(function (i, link) {
+    $(link).on('click', function () {
+      var id = link.textContent.replace(/ /g, '_');
+      console.log('toc scroll', id);
+      scrollTo(id);
+    });
+  });
 
 }
 
 function scrollTo(id) {
-	id = "#" + id;
+  id = "#" + id;
 
-	var height = $("#racetrack").outerHeight() + 10;
+  var height = $("#racetrack").outerHeight() + 10;
 
-	$('html, body').animate({
-  	scrollTop: $(id).offset().top - height
+  $('html, body').animate({
+    scrollTop: $(id).offset().top - height
   }, 000);
 }
 
@@ -226,17 +226,18 @@ function racerNew(data) {
   if (lane && data.id === socketId) {
     resizePage();
     lane.className += " self";
-    socket.emit('racer-ready', {id: socket.id});
+    socket.emit('racer-ready', { id: socket.id });
   }
 }
 
 function racerMove(data) {
-  displayRacerMove(data.id, data.page);
+  let isWinner = !!data.isWinner
+  displayRacerMove(data.id, data.page, isWinner);
 }
 
-function displayRacerMove(id, page) {
+function displayRacerMove(id, page, isWinner) {
   console.log('moving', id, page);
-	var lane = document.getElementById(id)
+  var lane = document.getElementById(id)
 
   if (!lane) {
     console.log("couldn't find lane:", id);
@@ -245,12 +246,15 @@ function displayRacerMove(id, page) {
 
   lane = lane.querySelector('ol');
 
-	var li = document.createElement('li');
+  var li = document.createElement('li');
 
   var text = page.replace('/wiki/', '');
-	li.textContent = text;
+  li.textContent = text;
+  if (isWinner) {
+    li.textContent += ' Winner!'
+  }
 
-	lane.appendChild(li);
+  lane.appendChild(li);
 
   resizePage();
 }
@@ -260,7 +264,7 @@ function racerCrash(data) {
   if (lane) {
     lane.className += " crash"
 
-    setTimeout(function() {
+    setTimeout(function () {
       $(lane).remove();
     }, 5000);
   }
@@ -290,11 +294,11 @@ function buildLane(data) {
   clear.className = 'clear';
 
   track.appendChild(lane);
-    lane.appendChild(info);
-      info.appendChild(time);
-      info.appendChild(name);
-    lane.appendChild(moves);
-    lane.appendChild(clear);
+  lane.appendChild(info);
+  info.appendChild(time);
+  info.appendChild(name);
+  lane.appendChild(moves);
+  lane.appendChild(clear);
 
   return lane;
 }
